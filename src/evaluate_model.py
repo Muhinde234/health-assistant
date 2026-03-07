@@ -1,4 +1,4 @@
-# evaluate_model.py
+
 import os
 import joblib
 import pandas as pd
@@ -6,23 +6,19 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from config import MODEL_PATH, DATA_URL
 
-# Import paths from config
+
 from config import MODEL_PATH
 from data_loader import load_data
 from preprocessing import preprocess_data
 
-# -------------------------------
-# Load the trained model
-# -------------------------------
+
 if not os.path.exists(MODEL_PATH):
     raise FileNotFoundError(f"Model not found at {MODEL_PATH}. Train your model first.")
 
 model = joblib.load(MODEL_PATH)
 print(f"Loaded model from {MODEL_PATH}: {type(model).__name__}")
 
-# -------------------------------
-# Feature importance function
-# -------------------------------
+
 def feature_importance(model, features):
     """
     Plot and return feature importance if available.
@@ -46,7 +42,7 @@ def feature_importance(model, features):
         "importance": importance
     }).sort_values("importance", ascending=True)
 
-    # Plot
+  
     plt.figure(figsize=(10,6))
     sns.barplot(x="importance", y="feature", data=df, palette="viridis")
 
@@ -60,18 +56,16 @@ def feature_importance(model, features):
     return df
 
 
-# -------------------------------
-# Example usage
-# -------------------------------
+
 if __name__ == "__main__":
 
-    # Load dataset
+   
     df =  load_data(DATA_URL)
 
-    # Preprocess
+
     X, y = preprocess_data(df)
 
-    # Get feature names
+    
     feature_names = X.columns.tolist()
 
     try:
