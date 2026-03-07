@@ -1,0 +1,16 @@
+[client]
+showErrorDetails = true
+allowRunOnSave = true
+
+[theme]
+primaryColor = "#00A8E8"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#E8F4F8"
+textColor = "#1A1A2E"
+font = "sans serif"
+
+[logger]
+level = "info"
+
+[browser]
+gatherUsageStats = false
