@@ -8,7 +8,7 @@ from datetime import datetime
 import plotly.graph_objects as go
 import plotly.express as px
 
-# Initialize session state for patient history
+
 if 'patient_history' not in st.session_state:
     st.session_state.patient_history = []
 
@@ -23,7 +23,7 @@ model_path = os.path.join(os.path.dirname(__file__), "../../models/heart_model.p
 model = joblib.load(model_path)
 
 
-# Feature descriptions and normal ranges
+
 FEATURE_INFO = {
     'age': {'name': 'Age', 'unit': 'years', 'normal': '20-65', 'description': 'Patient age in years'},
     'sex': {'name': 'Sex', 'options': {0: 'Female', 1: 'Male'}, 'description': 'Biological sex'},
@@ -60,89 +60,168 @@ FEATURE_INFO = {
 
 st.markdown("""
     <style>
+    /* Root variables */
+    :root {
+        --primary: #00A8E8;
+        --success: #27AE60;
+        --danger: #E74C3C;
+        --warning: #F39C12;
+        --info: #3498DB;
+    }
+    
     /* Main container */
     .main {
         padding: 1rem;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     }
     
     /* Title styling */
     h1 {
-        color: #00A8E8;
+        background: linear-gradient(135deg, #00A8E8 0%, #0091C9 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         text-align: center;
         margin-bottom: 0.5rem;
-        font-size: 2.5rem;
-        font-weight: 700;
+        font-size: 2.8rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
     }
     
     /* Subtitle styling */
     .subtitle {
         text-align: center;
         color: #555;
-        font-size: 1rem;
-        margin-bottom: 1rem;
+        font-size: 1.05rem;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
     }
     
-    /* Metric cards */
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* Card styling */
+    .card {
+        background: white;
         padding: 1.5rem;
         border-radius: 12px;
-        color: white;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-top: 4px solid #00A8E8;
+        transition: all 0.3s ease;
     }
     
-    /* Info box */
-    .info-box {
-        background-color: #E8F4F8;
-        padding: 1rem;
-        border-radius: 8px;
-        border-left: 4px solid #00A8E8;
-        margin: 1rem 0;
+    .card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
     }
     
-    /* Warning box */
-    .warning-box {
-        background-color: #FFF3CD;
-        padding: 1rem;
-        border-radius: 8px;
-        border-left: 4px solid #FFC107;
-        margin: 1rem 0;
+    /* Section headers */
+    h4 {
+        color: #00A8E8;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
     }
     
     /* Button styling */
     .stButton>button {
         width: 100%;
-        background-color: #00A8E8 !important;
+        background: linear-gradient(135deg, #00A8E8 0%, #0091C9 100%) !important;
         color: white !important;
         font-size: 1.1rem !important;
-        font-weight: 600 !important;
-        padding: 0.75rem !important;
-        border-radius: 8px !important;
+        font-weight: 700 !important;
+        padding: 0.85rem !important;
+        border-radius: 10px !important;
         border: none !important;
         transition: all 0.3s ease !important;
+        box-shadow: 0 4px 15px rgba(0,168,232,0.3) !important;
+        letter-spacing: 0.5px;
     }
     
     .stButton>button:hover {
-        background-color: #0091C9 !important;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,168,232,0.4) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 8px 25px rgba(0,168,232,0.5) !important;
+    }
+    
+    .stButton>button:active {
+        transform: translateY(-1px) !important;
     }
     
     /* Tab styling */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
+        background-color: transparent;
     }
     
     .stTabs [data-baseweb="tab"] {
-        padding: 10px 20px;
-        background-color: #E8F4F8;
-        border-radius: 8px 8px 0 0;
+        padding: 12px 24px;
+        background-color: white;
+        border-radius: 10px 10px 0 0;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        color: #666;
     }
     
     .stTabs [aria-selected="true"] {
-        background-color: #00A8E8;
+        background: linear-gradient(135deg, #00A8E8 0%, #0091C9 100%);
         color: white;
+        border-bottom: 3px solid #0091C9;
+    }
+    
+    /* Input styling */
+    .stNumberInput, .stSlider, .stSelectbox {
+        background-color: #f8f9fa;
+    }
+    
+    /* Slider styling */
+    .stSlider > div > div > div > div {
+        background: linear-gradient(to right, #E8F4F8, #00A8E8);
+    }
+    
+    /* Gauge styling */
+    .plotly {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    /* Success/Error/Warning boxes */
+    .stAlert {
+        border-radius: 12px;
+        border-left: 5px solid;
+    }
+    
+    .success-box {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border-left-color: #28a745;
+        padding: 1.25rem;
+        border-radius: 12px;
+        margin: 1rem 0;
+    }
+    
+    .error-box {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        border-left-color: #E74C3C;
+        padding: 1.25rem;
+        border-radius: 12px;
+        margin: 1rem 0;
+    }
+    
+    /* Divider */
+    hr {
+        border-color: #e0e0e0;
+        margin: 1.5rem 0;
+    }
+    
+    /* Sidebar */
+    .sidebar .sidebar-content {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    }
+    
+    .sidebar-metric {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin: 0.5rem 0;
+        border-left: 4px solid #00A8E8;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -161,38 +240,49 @@ st.markdown(
 
 # Sidebar
 with st.sidebar:
-    st.image("https://img.icons8.com/clouds/200/000000/heart-with-pulse.png", width=150)
-    st.markdown("## 🏥 Patient Dashboard")
-    
-    patient_name = st.text_input("👤 Patient Name", placeholder="Enter patient name")
-    patient_id = st.text_input("🆔 Patient ID", placeholder="Enter patient ID")
+    st.markdown("## 🏥 System Dashboard")
+    st.image("https://img.icons8.com/color/256/000000/heart-health.png", width=120)
     
     st.divider()
     
-    st.markdown("### 📊 Quick Stats")
+    st.markdown("### 📊 Assessment Statistics")
     if st.session_state.patient_history:
-        st.metric("Total Assessments", len(st.session_state.patient_history))
-        high_risk_count = sum(1 for p in st.session_state.patient_history if p['prediction'] == 1)
-        st.metric("High Risk Cases", high_risk_count)
+        col_stat1, col_stat2 = st.columns(2)
+        with col_stat1:
+            st.metric("📈 Total", len(st.session_state.patient_history))
+        with col_stat2:
+            high_risk_count = sum(1 for p in st.session_state.patient_history if p['prediction'] == 1)
+            st.metric("⚠️ High Risk", high_risk_count)
+        
+        st.markdown(f"**Low Risk**: {len(st.session_state.patient_history) - high_risk_count}")
+        
+        if st.session_state.patient_history:
+            avg_score = np.mean([p['risk_percentage'] for p in st.session_state.patient_history])
+            st.markdown(f"**Avg Score**: {avg_score:.1f}%")
     else:
-        st.info("No assessments yet")
+        st.info("💡 No assessments yet. Complete a risk assessment to see statistics.")
     
     st.divider()
     
-    st.markdown("### ℹ️ About This System")
+    st.markdown("### 🤖 AI Model Info")
     st.markdown("""
-    This AI system uses **Logistic Regression** and **Random Forest** models trained on the Cleveland Heart Disease dataset.
-    
+    **Model Type**: Logistic Regression  
     **Accuracy**: ~85%  
-    **Dataset**: 303 patients  
-    **Features**: 13 clinical parameters
+    **Features**: 13 Parameters  
+    **Dataset**: 303 Patients
     """)
     
     st.divider()
     
-    if st.button("🗑️ Clear History"):
-        st.session_state.patient_history = []
-        st.rerun()
+    col_clear = st.columns([1, 1])
+    with col_clear[0]:
+        if st.button("🗑️ Clear", use_container_width=True):
+            st.session_state.patient_history = []
+            st.rerun()
+    
+    with col_clear[1]:
+        if st.button("🔄 Refresh", use_container_width=True):
+            st.rerun()
 
 # Main tabs
 tab1, tab2, tab3, tab4 = st.tabs(["🔍 Risk Assessment", "📊 Analytics Dashboard", "📋 Patient History", "ℹ️ Information"])
@@ -259,12 +349,12 @@ with tab1:
         risk_prob = model.predict_proba(patient)
         
         risk_percentage = risk_prob[0][1] * 100
+        assessment_number = len(st.session_state.patient_history) + 1
         
         # Save to history
         assessment_record = {
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            'patient_name': patient_name if patient_name else "Anonymous",
-            'patient_id': patient_id if patient_id else "N/A",
+            'assessment_num': assessment_number,
             'prediction': int(prediction[0]),
             'risk_percentage': risk_percentage,
             'features': {
@@ -307,19 +397,19 @@ with tab1:
         
         # Display results
         if prediction[0] == 1:
-            st.error("### ⚠️ HIGH RISK DETECTED")
+            st.error("### ⚠️ HIGH RISK DETECTED - IMMEDIATE ACTION REQUIRED")
             st.markdown(f"""
-            <div style='background-color: #FFE5E5; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #E74C3C;'>
-                <h4 style='color: #C0392B; margin: 0;'>Risk Level: {risk_percentage:.1f}%</h4>
-                <p style='color: #555; margin: 0.5rem 0 0 0;'><strong>⚕️ Recommendation:</strong> Immediate consultation with a cardiologist is strongly recommended. Further diagnostic tests may be necessary.</p>
+            <div style='background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); padding: 1.5rem; border-radius: 12px; border-left: 5px solid #E74C3C;'>
+                <h3 style='color: #C0392B; margin: 0 0 0.5rem 0;'>⚠️ Risk Level: {risk_percentage:.1f}%</h3>
+                <p style='color: #555; margin: 0; line-height: 1.6;'><strong>Clinical Recommendation:</strong> Immediate consultation with a cardiologist is strongly recommended. Further diagnostic evaluation including ECG, stress testing, and imaging studies may be necessary.</p>
             </div>
             """, unsafe_allow_html=True)
         else:
-            st.success("### ✅ LOW RISK")
+            st.success("### ✅ LOW RISK - MAINTAIN HEALTHY LIFESTYLE")
             st.markdown(f"""
-            <div style='background-color: #E5F5E5; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #27AE60;'>
-                <h4 style='color: #1E8449; margin: 0;'>Risk Level: {risk_percentage:.1f}%</h4>
-                <p style='color: #555; margin: 0.5rem 0 0 0;'><strong>💚 Recommendation:</strong> Continue with regular health check-ups and maintain a healthy lifestyle. Monitor risk factors periodically.</p>
+            <div style='background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 1.5rem; border-radius: 12px; border-left: 5px solid #27AE60;'>
+                <h3 style='color: #1E8449; margin: 0 0 0.5rem 0;'>✅ Risk Level: {risk_percentage:.1f}%</h3>
+                <p style='color: #555; margin: 0; line-height: 1.6;'><strong>Clinical Recommendation:</strong> Continue with regular health monitoring and annual check-ups. Maintain a healthy lifestyle with balanced diet, regular exercise, and stress management.</p>
             </div>
             """, unsafe_allow_html=True)
         
@@ -353,48 +443,78 @@ with tab1:
         col_export = st.columns([1, 1, 1])
         with col_export[1]:
             report_data = f"""
-HEART DISEASE RISK ASSESSMENT REPORT
-=====================================
-Patient: {patient_name if patient_name else 'Anonymous'}
-Patient ID: {patient_id if patient_id else 'N/A'}
-Date: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+╔════════════════════════════════════════════════════════════════╗
+║       HEART DISEASE RISK ASSESSMENT REPORT                    ║
+╚════════════════════════════════════════════════════════════════╝
 
-RISK ASSESSMENT
----------------
-Risk Level: {'HIGH RISK' if prediction[0] == 1 else 'LOW RISK'}
+Report Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+Assessment #: {assessment_number}
+
+═══════════════════════════════════════════════════════════════════
+RISK ASSESSMENT RESULTS
+═══════════════════════════════════════════════════════════════════
+
+Risk Category: {'⚠️ HIGH RISK' if prediction[0] == 1 else '✅ LOW RISK'}
 Risk Score: {risk_percentage:.1f}%
 
+═══════════════════════════════════════════════════════════════════
 CLINICAL PARAMETERS
-------------------
-Age: {age} years
-Sex: {FEATURE_INFO['sex']['options'][sex]}
-Chest Pain: {FEATURE_INFO['cp']['options'][cp]}
-Resting BP: {trestbps} mm Hg
-Cholesterol: {chol} mg/dl
-Fasting Blood Sugar: {FEATURE_INFO['fbs']['options'][fbs]}
-Resting ECG: {FEATURE_INFO['restecg']['options'][restecg]}
-Max Heart Rate: {thalach} bpm
-Exercise Angina: {FEATURE_INFO['exang']['options'][exang]}
-ST Depression: {oldpeak} mm
-ST Slope: {FEATURE_INFO['slope']['options'][slope]}
-Major Vessels: {ca}
-Thalassemia: {FEATURE_INFO['thal']['options'][thal]}
+═══════════════════════════════════════════════════════════════════
 
-RISK FACTORS
-------------
-{chr(10).join(risk_factors) if risk_factors else 'No major risk factors identified'}
+Demographics:
+  • Age: {age} years
+  • Sex: {FEATURE_INFO['sex']['options'][sex]}
 
-RECOMMENDATION
---------------
-{'Immediate consultation with a cardiologist is recommended.' if prediction[0] == 1 else 'Continue regular health monitoring and maintain healthy lifestyle.'}
+Vital Signs & Laboratory:
+  • Resting Blood Pressure: {trestbps} mm Hg
+  • Cholesterol Level: {chol} mg/dl
+  • Fasting Blood Sugar: {FEATURE_INFO['fbs']['options'][fbs]}
+  • Maximum Heart Rate: {thalach} bpm
 
----
-This report was generated by an AI system and should be reviewed by a qualified healthcare professional.
+Cardiac Assessment:
+  • Chest Pain Type: {FEATURE_INFO['cp']['options'][cp]}
+  • Resting ECG: {FEATURE_INFO['restecg']['options'][restecg]}
+  • Exercise Induced Angina: {FEATURE_INFO['exang']['options'][exang]}
+  • ST Depression (Oldpeak): {oldpeak} mm
+  • ST Slope: {FEATURE_INFO['slope']['options'][slope]}
+  • Major Vessels Affected: {ca}
+  • Thalassemia Status: {FEATURE_INFO['thal']['options'][thal]}
+
+═══════════════════════════════════════════════════════════════════
+IDENTIFIED RISK FACTORS
+═══════════════════════════════════════════════════════════════════
+
+{chr(10).join(['  ' + factor for factor in risk_factors]) if risk_factors else '  ✓ No major risk factors identified'}
+
+═══════════════════════════════════════════════════════════════════
+CLINICAL RECOMMENDATION
+═══════════════════════════════════════════════════════════════════
+
+{'Immediate consultation with a cardiologist is strongly recommended. Further diagnostic evaluation and testing may be necessary. This patient should be prioritized for medical review.' if prediction[0] == 1 else 'Continue with regular health monitoring and maintain a healthy lifestyle. Monitor risk factors periodically. Annual check-ups are recommended.'}
+
+═══════════════════════════════════════════════════════════════════
+DISCLAIMER
+═══════════════════════════════════════════════════════════════════
+
+This report is generated by an artificial intelligence system designed
+as a DECISION SUPPORT TOOL ONLY. It is not a medical diagnosis and
+should NOT be used as the sole basis for clinical decision-making.
+
+All results must be reviewed and interpreted by a qualified healthcare
+professional in conjunction with:
+  • Complete physical examination
+  • Patient history and symptoms
+  • Additional diagnostic tests (ECG, stress tests, imaging, etc.)
+  • Clinical judgment and expertise
+
+═══════════════════════════════════════════════════════════════════
+Generated by: AI Heart Disease Risk Assessment System v1.0 Pro Max
+═══════════════════════════════════════════════════════════════════
             """
             st.download_button(
                 label="📄 Download Report",
                 data=report_data,
-                file_name=f"heart_risk_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                file_name=f"assessment_{assessment_number}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
                 mime="text/plain"
             )
 
@@ -475,82 +595,159 @@ with tab2:
 # TAB 3: Patient History
 with tab3:
     st.markdown("### 📋 Assessment History")
+    st.markdown("All completed risk assessments with detailed clinical parameters")
     
     if st.session_state.patient_history:
         for idx, record in enumerate(reversed(st.session_state.patient_history)):
-            with st.expander(f"🗓️ Assessment #{len(st.session_state.patient_history) - idx} - {record['timestamp']}", expanded=(idx==0)):
-                col_hist1, col_hist2 = st.columns([1, 2])
+            assessment_num = len(st.session_state.patient_history) - idx
+            
+            # Create expander with better styling
+            with st.expander(
+                f"{'⚠️' if record['prediction'] == 1 else '✅'} Assessment #{assessment_num} | "
+                f"{record['risk_percentage']:.1f}% Risk | {record['timestamp']}", 
+                expanded=(idx==0)
+            ):
+                col_hist1, col_hist2 = st.columns([1, 1])
                 
                 with col_hist1:
+                    st.markdown("**Assessment Summary**")
                     st.markdown(f"""
-                    **Patient:** {record['patient_name']}  
-                    **ID:** {record['patient_id']}  
-                    **Date:** {record['timestamp']}
-                    """)
+                    📅 **Date**: {record['timestamp']}
                     
-                    if record['prediction'] == 1:
-                        st.error(f"⚠️ HIGH RISK - {record['risk_percentage']:.1f}%")
-                    else:
-                        st.success(f"✅ LOW RISK - {record['risk_percentage']:.1f}%")
+                    📊 **Risk Level**: {'⚠️ HIGH RISK' if record['prediction'] == 1 else '✅ LOW RISK'}
+                    
+                    📈 **Risk Score**: {record['risk_percentage']:.1f}%
+                    """)
                 
                 with col_hist2:
-                    st.markdown("**Clinical Parameters:**")
+                    st.markdown("**Key Metrics**")
                     features = record['features']
                     st.markdown(f"""
-                    - Age: {features['age']} years | Sex: {FEATURE_INFO['sex']['options'][features['sex']]}
-                    - BP: {features['trestbps']} mm Hg | Cholesterol: {features['chol']} mg/dl
-                    - Max HR: {features['thalach']} bpm | ST Depression: {features['oldpeak']} mm
+                    👤 Age: {features['age']} yrs
+                    
+                    ❤️ BP: {features['trestbps']} | HR: {features['thalach']} bpm
+                    
+                    🩸 Chol: {features['chol']} mg/dl
+                    """)
+                
+                st.divider()
+                
+                st.markdown("**Complete Clinical Parameters**")
+                param_col1, param_col2 = st.columns(2)
+                
+                with param_col1:
+                    st.markdown(f"""
+                    **Demographics**
+                    - Age: {features['age']} years
+                    - Sex: {FEATURE_INFO['sex']['options'][features['sex']]}
+                    
+                    **Vital Signs**
+                    - BP: {features['trestbps']} mm Hg
+                    - Max HR: {features['thalach']} bpm
+                    - Cholesterol: {features['chol']} mg/dl
+                    - Blood Sugar: {FEATURE_INFO['fbs']['options'][features['fbs']]}
+                    """)
+                
+                with param_col2:
+                    st.markdown(f"""
+                    **Cardiac Assessment**
                     - Chest Pain: {FEATURE_INFO['cp']['options'][features['cp']]}
+                    - Resting ECG: {FEATURE_INFO['restecg']['options'][features['restecg']]}
                     - Exercise Angina: {FEATURE_INFO['exang']['options'][features['exang']]}
+                    - ST Depression: {features['oldpeak']} mm
+                    - ST Slope: {FEATURE_INFO['slope']['options'][features['slope']]}
+                    - Major Vessels: {features['ca']}
+                    - Thalassemia: {FEATURE_INFO['thal']['options'][features['thal']]}
                     """)
     else:
-        st.info("📋 No assessment history available yet.")
+        st.info("📋 No assessment history yet. Complete a risk assessment to build history.")
 
 # TAB 4: Information
 with tab4:
-    st.markdown("### ℹ️ About This System")
+    col_info1, col_info2 = st.columns([2, 1])
     
-    st.markdown("""
-    ## 🎯 Purpose
-    This AI-powered system provides **cardiac risk assessment** to assist healthcare professionals 
-    in evaluating the probability of heart disease in patients based on clinical parameters.
+    with col_info1:
+        st.markdown("## System Overview")
+        st.markdown("""
+        ### 🎯 Purpose
+        Advanced AI system for cardiac risk assessment to support clinical decision-making. 
+        Analyzes 13 key clinical parameters using machine learning to predict heart disease probability.
+        
+        ### 🤖 Technology Stack
+        - **Models**: Logistic Regression & Random Forest
+        - **Training Data**: Cleveland Heart Disease Database (303 patients)
+        - **Features**: 13 Clinical Parameters
+        - **Accuracy**: ~85% on test data
+        - **Framework**: Streamlit + Scikit-learn + Plotly
+        
+        ### 📊 Clinical Parameters Analyzed
+        """)
+        
+        params_col1, params_col2 = st.columns(2)
+        with params_col1:
+            st.markdown("""
+            **Demographics & Vitals**
+            - Age (years)
+            - Sex (M/F)
+            - Blood Pressure
+            - Heart Rate
+            - Cholesterol
+            
+            **Chest Symptoms**
+            - Chest Pain Type
+            - Exercise Angina
+            - ST Depression
+            """)
+        
+        with params_col2:
+            st.markdown("""
+            **Cardiac Assessment**
+            - ECG Results
+            - ST Segment Slope
+            - Major Vessels
+            - Thalassemia Status
+            
+            **Laboratory**
+            - Fasting Blood Sugar
+            """)
     
-    ## 🤖 Technology
-    - **Machine Learning Model**: Logistic Regression / Random Forest
-    - **Training Dataset**: Cleveland Heart Disease Database (303 patients)
-    - **Features**: 13 clinical and demographic parameters
-    - **Model Accuracy**: ~85% on test data
-    
-    ## 📊 Input Parameters
-    """)
-    
-    for feature, info in FEATURE_INFO.items():
-        st.markdown(f"**{info['name']}**: {info['description']}")
+    with col_info2:
+        st.markdown("### ℹ️ Quick Stats")
+        st.markdown(f"""
+        **Model Type**
+        Supervised Learning
+        
+        **Dataset**
+        Cleveland HD
+        
+        **Samples**
+        303 Patients
+        
+        **Accuracy**
+        ~85%
+        
+        **Version**
+        1.0 Pro Max
+        
+        **Status**
+        Production
+        """)
     
     st.divider()
     
+   
+    st.divider()
+    
     st.markdown("""
-    ## ⚠️ Medical Disclaimer
+    ## 📚 References & Sources
     
-    <div class="warning-box">
-    <strong>IMPORTANT:</strong> This system is designed as a <strong>decision support tool</strong> for healthcare professionals. 
-    It should NOT be used as the sole basis for medical diagnosis or treatment decisions.
-    
-    - ✅ Use as part of comprehensive clinical evaluation
-    - ✅ Combine with other diagnostic tests and clinical judgment
-    - ✅ Review all results with qualified medical professionals
-    - ❌ Do not use for self-diagnosis
-    - ❌ Do not replace professional medical advice
-    </div>
-    
-    ## 📞 Support
-    For technical support or questions, please contact your system administrator.
-    
-    ## 📚 References
-    - UCI Machine Learning Repository: Heart Disease Dataset
-    - Cleveland Clinic Foundation
-    - Research: Detrano, R. et al. (1989)
+    - **Dataset**: UCI Machine Learning Repository - Heart Disease (Cleveland)
+    - **Institution**: Cleveland Clinic Foundation
+    - **Key Research**: Detrano, R. et al. (1989) - International application of a new probability algorithm for the diagnosis of coronary artery disease
+    - **ML Framework**: Scikit-learn
+    - **Visualization**: Plotly
     
     ---
-    **Version**: 1.0 Pro Max | **Last Updated**: March 2026
+    
+   
     """, unsafe_allow_html=True)
