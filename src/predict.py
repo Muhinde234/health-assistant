@@ -2,11 +2,11 @@ import os
 import joblib
 import numpy as np
 
-# Get project root
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "heart_model.pkl")
 
-# Load model
+
 model = joblib.load(MODEL_PATH)
 
 def predict_patient(data):
