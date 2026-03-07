@@ -226,7 +226,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("❤️ AI Heart Disease Risk Assessment")
+st.markdown("<h1 style='text-align: center; background: linear-gradient(135deg, #00A8E8 0%, #0091C9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.8rem; font-weight: 800;'><i class='fas fa-heart' style='color: #E74C3C; margin-right: 0.5rem;'></i> AI Heart Disease Risk Assessment</h1>", unsafe_allow_html=True)
 
 st.markdown(
     """
