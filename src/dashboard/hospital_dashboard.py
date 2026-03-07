@@ -4,7 +4,7 @@ import joblib
 import numpy as np
 import os
 
-# Professional styling
+
 st.set_page_config(
     page_title="Heart Disease Risk Assessment",
     page_icon="❤️",
@@ -15,7 +15,7 @@ st.set_page_config(
 model_path = os.path.join(os.path.dirname(__file__), "../../models/heart_model.pkl")
 model = joblib.load(model_path)
 
-# Custom CSS for professional styling
+
 st.markdown("""
     <style>
     /* Main container */
@@ -81,7 +81,7 @@ st.markdown(
 
 st.divider()
 
-# Create two columns for better layout
+
 col1, col2 = st.columns(2)
 
 with col1:
@@ -105,11 +105,11 @@ with col2:
 
 st.divider()
 
-# Prediction button
+
 col_button = st.columns([1, 2, 1])
 with col_button[1]:
     if st.button("🔍 Predict Risk", use_container_width=True):
-        # Create feature array in correct order
+       
         patient = np.array([[age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal]])
 
         prediction = model.predict(patient)
@@ -119,7 +119,7 @@ with col_button[1]:
 
         st.divider()
         
-        # Display results with professional styling
+       
         if prediction[0] == 1:
             st.error(f"### ⚠️ HIGH RISK DETECTED")
             st.markdown(f"""
