@@ -726,8 +726,7 @@ with tab4:
         **Accuracy**
         ~85%
         
-        **Version**
-        1.0 Pro Max
+        
         
         **Status**
         Production
