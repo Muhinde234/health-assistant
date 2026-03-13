@@ -10,26 +10,19 @@ from preprocessing import preprocess_data, split_data
 from config import DATA_URL, MODEL_PATH
 
 def train():
-    # -------------------------------
-    # Determine absolute model path
-    # -------------------------------
-    # BASE_DIR is the root folder of the project
+ 
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     model_path = os.path.join(BASE_DIR, "models", "heart_model.pkl")
-    os.makedirs(os.path.dirname(model_path), exist_ok=True)  # create folder if not exists
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
 
     print(f"Model will be saved to: {model_path}")
 
-    # -------------------------------
-    # Load and preprocess data
-    # -------------------------------
+   
     df = load_data(DATA_URL)
     X, y = preprocess_data(df)
     X_train, X_test, y_train, y_test = split_data(X, y)
 
-    # -------------------------------
-    # Train multiple models
-    # -------------------------------
+
     models = {
         "logistic_regression": LogisticRegression(max_iter=1000),
         "random_forest": RandomForestClassifier(random_state=42)
@@ -48,9 +41,7 @@ def train():
             best_model = model
             best_score = score
 
-    # -------------------------------
-    # Save the best model
-    # -------------------------------
+  
     joblib.dump(best_model, model_path)
     if os.path.exists(model_path):
         print(f"Best model saved successfully at: {model_path}")
